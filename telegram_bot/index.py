@@ -1,10 +1,10 @@
 import os
-
+import datetime
 import telebot
 from pytube import YouTube
-from os import remove
 from os import rename
 
+caracteres = ['#', '.', "'", '"', '<', '>', ':','/', '\ ', '?', '*', '|']
 
 TOKEN = '5654977914:AAHMZ6aY60j2xbY8r5VTOUNuIwh4YviuxKA'
 
@@ -18,6 +18,8 @@ def boas_vindas(mensagem):
                            'O BOT ainda esta em fase de desenvolvimento espero que gostem e que passem feedback ')
 
 
+
+
 @bot.message_handler(commands=['dv'])
 def baixar_video(mensagem):
     URL = str(mensagem.text)
@@ -25,19 +27,11 @@ def baixar_video(mensagem):
 
     yt = YouTube(URL)
     video = yt.streams.filter(file_extension='mp4').first()
-    video.download()#baixando video
+    video.download()  #baixando video
     nome_video = yt.title
-    if '#' in nome_video:
-        nome_video = nome_video.replace('#', '')
-
-    if'.' in nome_video:
-        nome_video = nome_video.replace('.', '')
-
-    if '|' in nome_video:
-        nome_video = nome_video.replace('|', '')
-
-    if '"' in nome_video:
-        nome_video = nome_video.replace('"', '')
+    for letra in nome_video:
+        if letra in caracteres:
+            nome_video = nome_video.replace(letra, '')
 
 
     video = open(fr"D:\programasdogrolicos\Python\exercicios_praticos\telegram_bot\{nome_video}.mp4", 'rb')
@@ -46,7 +40,7 @@ def baixar_video(mensagem):
     except:
         bot.reply_to(mensagem, 'houve algum problema, talvez nao seja possivel fazer o download')
     with open('pessoas_musicas.txt', 'a', encoding='UTF-8') as txt:
-        txt.write(f'{yt.title}-VIDEO-{mensagem.chat.first_name}\n')
+        txt.write(f'{yt.title}-VIDEO-{mensagem.chat.first_name}-{datetime.datetime.now()}\n')
     video.close()
     os.remove(f'{str(nome_video)}.mp4')
 
@@ -57,25 +51,13 @@ def baixar_musica(mensagem):
 
     yt = YouTube(URL)
     audio = yt.streams.filter(only_audio=True).first()
+    nome_video = str(yt.title)
+
     audio.download()
-    nome_video = yt.title
-    if '#' in nome_video:
-        nome_video = nome_video.replace('#', '')
+    for letra in nome_video:
+        if letra in caracteres:
+            nome_video = nome_video.replace(letra, '')
 
-    if '.' in nome_video:
-        nome_video = nome_video.replace('.', '')
-
-    if '|' in nome_video:
-        nome_video = nome_video.replace('|', '')
-
-    if '"' in nome_video:
-        nome_video = nome_video.replace('"', '')
-    if '"' in nome_video:
-        nome_video = nome_video.replace("'", '')
-    if '>' or '<' in nome_video:
-        nome_video = nome_video.replace(">", '')
-    if ',' in nome_video:
-        nome_video = nome_video.replace(",", '')
 
     arquivo = f"{str(nome_video)}.mp4"
     rename(arquivo, fr'{str(nome_video)}.mp3')
@@ -96,5 +78,3 @@ def baixar_musica(mensagem):
 
 
 bot.polling()
-
-
